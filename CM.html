@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cooking Mama</title>
+  
+  <style>
+    @font-face {
+      font-family: 'DDOSSaemmul';
+      src: url('DOSSaemmul.ttf') format('truetype');
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+
+    #intro {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffb6d9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-family: 'DDOSSaemmul', sans-serif;
+  font-size: clamp(24px, 6vw, 48px);
+  z-index: 9999;
+}
+
+#counter {
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+#startBtn {
+  font-family: 'DDOSSaemmul', sans-serif;
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 15px;
+  border: 3px solid #ff8fc3;
+  background-color: white;
+  color: #ff69b4;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+#startBtn:hover {
+  transform: scale(1.05);
+  background-color: #ffe5f0;
+}
+
+.wrapper {
+  display: none; /* ✅ 초반에는 숨김 */
+}
+
+    body {
+      font-family: 'DDOSSaemmul', sans-serif;
+      background-color: #fffce9;
+      background-image: radial-gradient(#ffd4e6 4px, transparent 4px),
+                        radial-gradient(#ffd4e6 4px, transparent 4px);
+      background-position: 0 0, 20px 20px;
+      background-size: 40px 40px;
+    }
+
+    .wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 1rem;
+}
+
+.sound-toggle {
+  position: fixed;         /* 📌 화면 기준으로 고정 */
+  top: 20px;               /* 화면 상단에서 20px 내려오고 */
+  right: 20px;             /* 화면 우측에서 20px 떨어짐 */
+  width: clamp(30px, 5vw, 35px);
+  cursor: pointer;
+  z-index: 9999;           /* 항상 위에 보이게 */
+  transition: transform 0.2s ease;
+}
+
+.sound-toggle:active {
+  transform: scale(0.9);
+}
+
+.sound-toggle img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.container {
+  aspect-ratio: 1.4 / 1;
+  width: min(130vw, 110vh);     /* ✅ 폭 더 넓게 */
+  max-width: 1800px;            /* ✅ 최대 폭 상향 */
+  max-height: 1200px;           /* ✅ 최대 높이 상향 */
+  padding: 32px;                /* ✅ 안쪽 여백도 키움 */
+
+  background-image: url('image/main_background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border: 6px solid #ff8dbd;
+  border-radius: 30px;
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+
+
+.title {
+  font-size: clamp(42px, 8vw, 100px);
+  color: #ff5ca0;
+  text-align: center;
+  font-weight: bold;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  text-shadow:
+    -2px -2px 0 white,
+     2px -2px 0 white,
+    -2px  2px 0 white,
+     2px  2px 0 white;
+     display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.title:active {
+  transform: scale(0.95); /* ✅ 눌리는 애니메이션 효과 */
+}
+
+.subtitle {
+  font-size: clamp(28px, 5vw, 50px); /* ↑ 크기 상향 */
+  font-weight: bold;
+  color: #ff5ca0;
+  text-align: center;
+  font: weight 2px;
+  margin-top: 5px; /* 좀 더 자연스럽게 */
+  line-height: 1.4;
+  text-shadow:
+    -2px -2px 0 white,
+     2px -2px 0 white,
+    -2px  2px 0 white,
+     2px  2px 0 white;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: clamp(1rem, 5vh, 4rem); /* 화면 높이에 따라 유동적으로 여백 조절 */
+}
+
+.menu button {
+  font-family: 'DDOSSaemmul', sans-serif;
+  font-size: clamp(8px, 1.5vw, 35px);  /* ↑ 크기 상승 */
+  font-weight: bold;
+  padding: clamp(0.6rem, 2vw, 1.2rem) clamp(1rem, 3vw, 2rem); /* ↑ 여백 증가 */
+  border: 3px solid #ff99c8;
+  border-radius: 15px;
+  background-color: white;
+  color: #ff289b;
+  cursor: pointer;
+
+  width: clamp(80px, 13vw, 300px); /* ↑ 전체 버튼 너비 증가 */
+  text-align: center;
+  white-space: nowrap;
+  transition: transform 0.2s ease;
+  transition: all 0.15s ease;
+}
+
+.menu button:active {
+  transform: scale(0.95); /* 눌리는 듯한 효과 */
+  background-color: #ffe6f1; /* 연핑크 배경으로 변화 */
+  border-color: #ff69b4;
+  color: #ff3399;
+}
+
+/* ✅ 여기! 음식 이미지 공통 스타일 */
+.food-top,
+  .food-bottom,
+  .food-left {
+    position: absolute;
+    width: clamp(60px, 7vw, 200px); /* ↑ 이미지 커짐 */
+  z-index: 3;
+  }
+
+  .food-top {
+  top: 43%; /* 적당히 위 */
+  right: 0%;
+  bottom: auto;
+}
+
+.food-bottom {
+  
+  bottom: 7%;
+  right: -3%;
+}
+
+.food-left {
+  bottom: 13%;
+  right: 20%;  /* ✅ right 값 줄여서 실제로 오른쪽으로 이동 */
+  left: auto;
+}
+
+.character-wrapper {
+  position: absolute;
+  bottom: 5%;
+  right: 3%;
+  width: clamp(180px, 17vw, 400px); /* ↑ 캐릭터 조금 더 크게 */
+  max-width: 36%;
+  height: auto;
+}
+
+.character {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.sparkle {
+  position: absolute;
+  width: clamp(28px, 6vw, 42px); /* 전체 반짝이 사이즈 상향 */
+  animation: floatSparkle 4s ease-in-out infinite;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* 각 반짝이별 위치 조정 */
+.sparkle1 { top: 0%; left: 18%; width: clamp(18px, 4vw, 30px); /* 살짝 작게 */  animation-delay: 0s; }
+.sparkle2 { top: 15%; right: 5%; animation-delay: 0.5s; }
+.sparkle3 { top: 30%; left: -3%; width: clamp(20px, 4.5vw, 35px); /* 아주 살짝 작게 */  animation-delay: 1s; }
+.sparkle4 { bottom: 30%; right: -10%; width: clamp(18px, 4vw, 30px); animation-delay: 1.5s; }
+.sparkle5 { bottom: 5%; left: 30%; animation-delay: 2s; }
+
+@keyframes floatSparkle {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+  @keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+  }
+
+  /* (2) 애니메이션 적용 */
+  .character,
+  .food-top,
+  .food-bottom,
+  .food-left {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .character { animation-delay: 0s; }
+.food-top { animation-delay: 0.5s; }
+.food-bottom { animation-delay: 1s; }
+.food-left { animation-delay: 1.5s; }
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding: 0.8rem 0;
+  font-size: 0.8rem;
+  color: #888;
+  background-color: #ffe2f0;
+  border-top: 2px dotted #ffb6d9;
+  box-shadow: inset 0 2px 0 #fff;
+  z-index: 10;
+}
+
+    @media (max-width: 600px) {
+      .title { font-size: 10vw; }
+      .subtitle { font-size: 3.5vw; }
+      .menu button { font-size: 4vw; width: 80%; }
+    }
+
+    
+    body {
+  cursor: url('image/cursor.cur'), auto;
+}
+
+body.clicked {
+  cursor: url('image/cursor_click.cur'), auto;
+}
+
+button,
+a.button,
+.menu button,
+#startBtn,
+.sound-toggle {
+  cursor: url('image/cusor_button.cur'), pointer;
+}
+
+.heart {
+  position: fixed;
+  font-size: 20px;
+  color: rgb(255, 172, 206);
+  pointer-events: none;
+  animation: followFade 1s ease-out forwards;
+  z-index: 9999;
+  opacity: 0.8;
+}
+
+@keyframes followFade {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(5px, -10px) scale(1.5); opacity: 0; }
+}
+
+.heart-click {
+  position: fixed;
+  font-size: 25px;
+  color: rgb(255, 117, 186);
+  pointer-events: none;
+  animation: riseFade 1s ease-out forwards;
+  z-index: 9999;
+  opacity: 0.9;
+}
+
+@keyframes riseFade {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-60px) scale(1.5); opacity: 0; }
+}
+
+.cute-floating {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0; /* ✅ 컨테이너(기본 z-index 1 이상)보다 아래로 */
+  opacity: 0.9;
+  animation: floatCute 6s ease-in-out infinite;
+}
+
+@keyframes floatCute {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
+}
+
+.dropdown-nav {
+  position: absolute;
+  top: clamp(12px, 2vw, 20px);
+  right: clamp(12px, 2vw, 20px);
+  z-index: 999;
+}
+
+.nav-toggle {
+  font-family: 'DDOSSaemmul', sans-serif;
+  font-size: clamp(20px, 3vw, 30px);
+  background: #fff;
+  border: 2px solid #ff8dbd;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  color: #ff3399;
+  cursor: url('image/cusor_button.cur'), pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s ease;
+}
+
+.nav-toggle:hover {
+  background-color: #ffe2f0;
+}
+
+.nav-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: none;
+  flex-direction: column;
+  background: #fffce9;
+  border: 2px solid #ffb6d9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  z-index: 998;
+}
+
+.nav-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 180px;
+  padding: 0.6rem 1.2rem;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: #da2485;
+  text-decoration: none;
+  border-bottom: 1px solid #ffe2f0;
+}
+
+.nav-menu a:last-child {
+  border-bottom: none;
+}
+
+.nav-menu a:hover {
+  background: #ffb6d9;
+  color: white;
+  cursor: url('image/cusor_button.cur'), pointer;
+}
+
+.nav-menu.show {
+  display: flex;
+}
+
+.heart-bg {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.8;
+  font-size: 30px;
+  color: #ffbbcc;
+  animation: popFade 2.5s ease-out forwards;
+}
+
+@keyframes popFade {
+  0% {
+    transform: scale(0.6) translateY(0);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.2) translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-60px);
+    opacity: 0;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <div id="intro">
+    <div id="counter">0%</div>
+    <button id="startBtn">START</button>
+  </div>
+
+    <div class="wrapper">
+      
+      <div class="sound-toggle" id="soundToggle">
+        <img src="image/speaker.png" alt="Sound On" id="soundIcon" />
+      </div>
+
+        <div class="container">
+            <a href="CM.html" class="title">Cooking Mama</a>
+    <div class="subtitle">맛있고 귀여운 음식 세상!</div>
+    
+    <!-- 네비게이션 드롭다운 메뉴 -->
+<div class="dropdown-nav">
+  <button class="nav-toggle" aria-label="메뉴 열기">≡</button>
+  <div class="nav-menu">
+    <a href="CM.html">🏠 홈</a>
+    <a href="MAMA.html">🍳 쿠킹마마</a>
+    <a href="Recipe.html">📖 레시피</a>
+    <a href="Tip.html">💡 도구팁</a>
+  </div>
+</div>
+
+    <div class="menu">
+      <a href="MAMA.html"><button>쿠킹마마</button></a>
+      <a href="Recipe.html"><button>레시피</button></a>
+      <a href="Tip.html"><button>도구팁</button></a>
+    </div>
+
+    <div class="character-wrapper">
+    <img src="image/character.png" alt="쿠킹마마 캐릭터" class="character" />
+    
+    <img src="image/sparkle.png" alt="반짝이1" class="sparkle sparkle1">
+    <img src="image/sparkle.png" alt="반짝이2" class="sparkle sparkle2">
+    <img src="image/sparkle.png" alt="반짝이3" class="sparkle sparkle3">
+    <img src="image/sparkle.png" alt="반짝이4" class="sparkle sparkle4">
+    <img src="image/sparkle.png" alt="반짝이5" class="sparkle sparkle5">
+    </div>
+
+    <img src="image/pudding.png" alt="푸딩" class="food-top" />
+    <img src="image/tempura.png" alt="튀김우동" class="food-bottom" />
+    <img src="image/omelette.png" alt="오믈렛" class="food-left" />
+  </div>
+  </div>
+  <footer>© 2025 쿠킹마마 팬페이지 · 비공식 사이트입니다.</footer>
+
+  <script>
+    const container = document.querySelector('.container');
+  
+    for (let i = 0; i < 8; i++) { // 원하는 만큼 (10개 생성)
+      const sparkle = document.createElement('img');
+      sparkle.src = 'image/sparkle.png'; // 반짝이 이미지 경로
+      sparkle.alt = '반짝이';
+      sparkle.className = 'sparkle';
+  
+      // 랜덤 위치 (5%~95% 범위로)
+      sparkle.style.top = Math.random() * 90 + 5 + '%';
+      sparkle.style.left = Math.random() * 90 + 5 + '%';
+  
+      // 랜덤 크기 (20px ~ 40px)
+      const size = Math.random() * 25 + 15;
+      sparkle.style.width = size + 'px';
+  
+      // 랜덤 애니메이션 딜레이 (0~5초)
+      sparkle.style.animationDelay = (Math.random() * 5) + 's';
+  
+      container.appendChild(sparkle);
+    }
+</script>
+    
+<audio id="clickSound" src="button-click.mp3" preload="auto"></audio>
+<audio id="bgm" src="CM_background.mp3" loop></audio>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.body.addEventListener('mousedown', () => {
+  document.body.classList.add('clicked');
+});
+document.body.addEventListener('mouseup', () => {
+  document.body.classList.remove('clicked');
+});
+
+// 하트가 너무 많이 생기지 않게 타이머 설정
+let lastMoveTime = 0;
+document.addEventListener('mousemove', function(e) {
+  const now = Date.now();
+  if (now - lastMoveTime < 100) return; // 최소 간격 100ms
+  lastMoveTime = now;
+
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.textContent = '♥';
+  heart.style.left = (e.pageX - 5) + 'px';
+  heart.style.top = (e.pageY - 5) + 'px';
+  document.body.appendChild(heart);
+
+  setTimeout(() => heart.remove(), 1000);
+});
+
+// 클릭 시 여러 개의 하트가 뾰로롱 올라감
+document.addEventListener('click', function(e) {
+  for (let i = 0; i < 5; i++) {
+    const heart = document.createElement('div');
+    heart.className = 'heart-click';
+    heart.textContent = '♥';
+
+    const offsetX = (Math.random() - 0.5) * 40; // -20 ~ +20 px
+    const offsetY = (Math.random() - 0.5) * 20;
+
+    heart.style.left = (e.pageX + offsetX) + 'px';
+    heart.style.top = (e.pageY + offsetY) + 'px';
+
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1000);
+  }
+});
+
+function createFloatingCuteImages() {
+  const numImages = 15;
+  for (let i = 0; i < numImages; i++) {
+    const img = document.createElement('img');
+    const randomIndex = Math.floor(Math.random() * 9) + 1;
+    img.src = `image/cute${randomIndex}.png`;
+    img.className = 'cute-floating';
+
+    const size = Math.random() * 30 + 30;
+    img.style.width = `${size}px`;
+
+    const top = Math.random() * 100;
+    const left = Math.random() * 100;
+
+    // ✅ 컨테이너 영역(대략 중앙 30~70% 범위)을 피해서 배치
+    if (top > 30 && top < 70 && left > 30 && left < 70) {
+      i--; continue; // 다시 반복
+    }
+
+    img.style.top = `${top}%`;
+    img.style.left = `${left}%`;
+
+    img.style.animationDelay = `${Math.random() * 5}s`;
+    img.style.animationDuration = `${5 + Math.random() * 4}s`;
+
+    document.body.appendChild(img);
+  }
+}
+
+    const counter = document.getElementById('counter');
+    const startBtn = document.getElementById('startBtn');
+    const intro = document.getElementById('intro');
+    const wrapper = document.querySelector('.wrapper');
+    const bgm = document.getElementById('bgm');
+    const clickSound = document.getElementById('clickSound');
+    const toggle = document.getElementById('soundToggle');
+    const icon = document.getElementById('soundIcon');
+
+    let isPlaying = true;
+    let percent = 0;
+
+    const interval = setInterval(() => {
+      percent += 1;
+      if (counter) counter.textContent = percent + '%';
+      if (percent >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          if (startBtn) {
+            startBtn.style.opacity = 1;
+            startBtn.style.pointerEvents = 'auto';
+          }
+        }, 300);
+      }
+    }, 10);
+
+    if (startBtn) {
+      startBtn.addEventListener('click', () => {
+        if (clickSound) {
+          clickSound.currentTime = 0;
+          clickSound.play().catch(() => {});
+        }
+        if (intro) intro.style.display = 'none';
+        if (wrapper) wrapper.style.display = 'flex';
+        if (bgm) bgm.play().catch(() => {});
+      });
+    }
+
+    const menuLinks = document.querySelectorAll('.menu a');
+    menuLinks.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (clickSound) {
+          clickSound.currentTime = 0;
+          clickSound.play().catch(() => {});
+        }
+        setTimeout(() => {
+          window.location.href = link.href;
+        }, 150);
+      });
+    });
+
+    if (toggle && icon) {
+      toggle.addEventListener('click', () => {
+        if (clickSound) {
+          clickSound.currentTime = 0;
+          clickSound.play().catch(() => {});
+        }
+        if (isPlaying) {
+          if (bgm) bgm.pause();
+          icon.src = 'image/mute.png';
+        } else {
+          if (bgm) bgm.play().catch(() => {});
+          icon.src = 'image/speaker.png';
+        }
+        isPlaying = !isPlaying;
+      });
+    }
+  });
+
+  // 드롭다운 메뉴 열고 닫기
+const navToggle = document.querySelector('.nav-toggle');
+const navMenu = document.querySelector('.nav-menu');
+
+navToggle.addEventListener('click', () => {
+  navMenu.classList.toggle('show');
+  playClick();
+});
+
+function isOverlappingContainer(x, y) {
+  const container = document.querySelector('.container');
+  const rect = container.getBoundingClientRect();
+  return (
+    x > rect.left &&
+    x < rect.right &&
+    y > rect.top &&
+    y < rect.bottom
+  );
+}
+
+function createFloatingHeart() {
+  const heart = document.createElement('div');
+  heart.className = 'heart-bg';
+  heart.textContent = '♥';
+
+  let x, y;
+  let tries = 0;
+  const maxTries = 15;
+
+  do {
+    x = Math.random() * window.innerWidth;
+    y = Math.random() * window.innerHeight;
+    tries++;
+  } while (isOverlappingContainer(x, y) && tries < maxTries);
+
+  heart.style.left = `${x}px`;
+  heart.style.top = `${y}px`;
+
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 2500);
+}
+
+// 주기적으로 여러 하트를 생성
+setInterval(() => {
+  const count = Math.floor(Math.random() * 3) + 4; // 4~6개 생성
+  for (let i = 0; i < count; i++) {
+    setTimeout(createFloatingHeart, i * 150);
+  }
+}, 2000);
+
+
+</script>
+
+
+
+</body>
+</html>

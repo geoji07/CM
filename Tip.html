@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>도구팁</title>
+  <style>
+    @font-face {
+      font-family: 'DDOSSaemmul';
+      src: url('DOSSaemmul.ttf') format('truetype');
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow-x: hidden; }
+
+    body {
+      font-family: 'DDOSSaemmul', sans-serif;
+      background-color: #fffce9;
+      background-image:
+        radial-gradient(#ffd4e6 4px, transparent 4px),
+        radial-gradient(#ffd4e6 4px, transparent 4px);
+      background-position: 0 0, 20px 20px;
+      background-size: 40px 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      cursor: url('image/cursor.cur'), auto;
+    }
+
+    body.clicked {
+      cursor: url('image/cursor_click.cur'), auto;
+    }
+
+    .logo {
+      position: fixed;
+      top: clamp(10px, 2vw, 12px);
+      left: clamp(10px, 2vw, 12px);
+      width: clamp(24px, 5vw, 100px);
+      z-index: 1000;
+    }
+
+    .logo img {
+      width: 100%;
+      display: block;
+    }
+
+    .sound-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: clamp(30px, 5vw, 35px);
+      z-index: 30;
+    }
+
+    .sound-toggle img {
+      width: 100%;
+      display: block;
+    }
+
+    .container {
+      aspect-ratio: 1.4 / 1;
+      width: min(130vw, 110vh);
+      max-width: 1800px;
+      max-height: 1200px;
+      padding: 32px;
+      background-image: url('image/tip_background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 6px solid #ff8dbd;
+      border-radius: 30px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      overflow: visible; /* 라벨 잘리지 않도록 */
+    }
+
+    .recipe-label {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(200px, 40%, 360px);
+      height: clamp(60px, 8vw, 90px);
+      background: #ffedcd;
+      border: 6px solid #ff8dbd;
+      border-radius: 50%/50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(20px, 3vw, 32px);
+      font-weight: bold;
+      color: #da2485;
+      padding: 0 1.5rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
+
+    .dropdown-nav {
+      position: absolute;
+      top: clamp(12px, 2vw, 20px);
+      right: clamp(12px, 2vw, 20px);
+      z-index: 999;
+    }
+
+    .nav-toggle {
+      font-family: 'DDOSSaemmul', sans-serif;
+      font-size: clamp(20px, 3vw, 30px);
+      background: #fff;
+      border: 2px solid #ff8dbd;
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      color: #ff3399;
+      cursor: url('image/cusor_button.cur'), pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: background 0.2s ease;
+    }
+
+    .nav-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      display: none;
+      flex-direction: column;
+      background: #fffce9;
+      border: 2px solid #ffb6d9;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      z-index: 998;
+    }
+
+    .nav-menu a {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      min-width: 180px;
+      padding: 0.6rem 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      color: #da2485;
+      text-decoration: none;
+      border-bottom: 1px solid #ffe2f0;
+    }
+
+    .nav-menu a:last-child {
+      border-bottom: none;
+    }
+
+    .nav-menu.show {
+      display: flex;
+    }
+
+    .card-slider {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 0.68;
+  margin-top: 6rem;
+  overflow: hidden;
+}
+
+    .card {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(240px, 90%, 500px); /* 최소 240px, 최대 500px */
+  aspect-ratio: 0.68;
+  background: #fff;
+  border: 6px solid #ff8dbd;
+  border-radius: 30px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #da2485;
+  opacity: 0;
+  transition: all 0.5s ease;
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* or contain if 여백 원할 경우 */
+  border-radius: 24px; /* 카드의 border-radius보다 약간 작게 */
+}
+
+
+    .card-guide {
+  position: absolute;
+  bottom: 2rem; /* 카드 하단에서 조금 띄우기 */
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: bold;
+  text-shadow: 0 0 4px rgba(0,0,0,0.3);
+  z-index: 10;
+  pointer-events: none;
+}
+
+    .card.active {
+      top: 0;
+      opacity: 1;
+    }
+
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #ffbbd9;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      padding: 1rem 1.4rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      z-index: 100;
+    }
+
+   .arrow:first-of-type {
+  left: 0;
+  transform: translate(-150%, -50%); /* 왼쪽으로 바깥으로 밀기 */
+}
+
+.arrow:last-of-type {
+  right: 0;
+  transform: translate(150%, -50%); /* 오른쪽으로 바깥으로 밀기 */
+}
+
+    .heart, .heart-click, .heart-bg {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.8;
+    }
+
+    .heart {
+      font-size: 20px;
+      color: rgb(255, 172, 206);
+      animation: followFade 1s ease-out forwards;
+    }
+
+    .heart-click {
+      font-size: 25px;
+      color: rgb(255, 117, 186);
+      animation: riseFade 1s ease-out forwards;
+    }
+
+    .heart-bg {
+      font-size: 30px;
+      color: #ffbbcc;
+      animation: popFade 2.5s ease-out forwards;
+      z-index: 0;
+    }
+
+    @keyframes popFade {
+      0% { transform: scale(0.6) translateY(0); opacity: 0; }
+      30% { transform: scale(1.2) translateY(-10px); opacity: 1; }
+      100% { transform: scale(1) translateY(-60px); opacity: 0; }
+    }
+
+    @keyframes followFade {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(5px, -10px) scale(1.5); opacity: 0; }
+    }
+
+    @keyframes riseFade {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-60px) scale(1.5); opacity: 0; }
+    }
+
+    footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding: 0.8rem 0;
+  font-size: 0.8rem;
+  color: #888;
+  background-color: #ffe2f0;
+  border-top: 2px dotted #ffb6d9;
+  box-shadow: inset 0 2px 0 #fff;
+  z-index: 10;
+}
+
+  </style>
+</head>
+<body>
+  <a href="CM.html" class="logo"><img src="image/logo.png" alt="로고" /></a>
+  <div class="container">
+    <div class="sound-toggle"><img src="image/mute.png" alt="음소거" /></div>
+    <div class="dropdown-nav">
+      <button class="nav-toggle">≡</button>
+      <div class="nav-menu">
+        <a href="CM.html">🏠 홈</a>
+        <a href="MAMA.html">🍳 쿠킹마마</a>
+        <a href="Recipe.html">📖 레시피</a>
+        <a href="Tip.html">💡 도구팁</a>
+      </div>
+    </div>
+    <div class="recipe-label">도구팁</div>
+    <div class="card-slider" onclick="changeCard(1)">
+  <div class="card active"><img src="image/card_spatula.png" alt="뒤집개" /></div>
+<div class="card"><img src="image/card_fryingpan.png" alt="후라이팬" /></div>
+<div class="card"><img src="image/card_salt.png" alt="소금" /></div>
+<div class="card"><img src="image/card_pepper.png" alt="후추" /></div>
+<div class="card"><img src="image/card_knife.png" alt="칼" /></div>
+
+  </div>
+  <div class="card-guide">터치 시 카드가 넘어가요!</div>
+  </div>
+
+   <footer>© 2025 쿠킹마마 팬페이지 · 비공식 사이트입니다.</footer>
+
+  <audio id="bgm" src="music.m4a" loop autoplay></audio>
+  <audio id="clickSound" src="button-click.mp3" preload="auto"></audio>
+
+  <script>
+    let currentIndex = 0;
+    function changeCard(direction) {
+      const cards = document.querySelectorAll('.card');
+      cards[currentIndex].classList.remove('active');
+      currentIndex = (currentIndex + direction + cards.length) % cards.length;
+      cards[currentIndex].classList.add('active');
+    }
+
+    // ✅ 중복 제거: nav 메뉴 토글 이벤트 1개만
+    document.querySelector('.nav-toggle').addEventListener('click', () => {
+      playClick();
+      document.querySelector('.nav-menu').classList.toggle('show');
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      const now = Date.now();
+      if (!window.lastMoveTime || now - window.lastMoveTime >= 100) {
+        window.lastMoveTime = now;
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = '♥';
+        heart.style.left = (e.pageX - 5) + 'px';
+        heart.style.top = (e.pageY - 5) + 'px';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      for (let i = 0; i < 5; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart-click';
+        heart.textContent = '♥';
+        const offsetX = (Math.random() - 0.5) * 40;
+        const offsetY = (Math.random() - 0.5) * 20;
+        heart.style.left = (e.pageX + offsetX) + 'px';
+        heart.style.top = (e.pageY + offsetY) + 'px';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
+      }
+    });
+
+    document.addEventListener('mousedown', () => {
+      document.body.classList.add('clicked');
+    });
+
+    document.addEventListener('mouseup', () => {
+      document.body.classList.remove('clicked');
+    });
+
+    function isOverlappingContainer(x, y) {
+      const container = document.querySelector('.container');
+      const rect = container.getBoundingClientRect();
+      return (
+        x > rect.left &&
+        x < rect.right &&
+        y > rect.top &&
+        y < rect.bottom
+      );
+    }
+
+    function createFloatingHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'heart-bg';
+      heart.textContent = '♥';
+
+      let x, y;
+      let tries = 0;
+      const maxTries = 15;
+
+      do {
+        x = Math.random() * window.innerWidth;
+        y = Math.random() * window.innerHeight;
+        tries++;
+      } while (isOverlappingContainer(x, y) && tries < maxTries);
+
+      heart.style.left = `${x}px`;
+      heart.style.top = `${y}px`;
+
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 2500);
+    }
+
+    setInterval(() => {
+      const count = Math.floor(Math.random() * 3) + 4;
+      for (let i = 0; i < count; i++) {
+        setTimeout(createFloatingHeart, i * 150);
+      }
+    }, 2000);
+
+    const bgm = document.getElementById('bgm');
+    const clickSound = document.getElementById('clickSound');
+    const soundToggleIcon = document.querySelector('.sound-toggle img');
+
+    function playClick() {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+    }
+
+    // ✅ 클릭 사운드 연결: 다양한 요소
+    const clickableSelectors = [
+      '.nav-toggle',
+      '.nav-menu a',
+      '.sound-toggle',
+      '.card-slider',
+      '.logo' // ✅ 로고 클릭 시 사운드 추가됨
+    ];
+
+    clickableSelectors.forEach(selector => {
+      document.querySelectorAll(selector).forEach(elem => {
+        elem.addEventListener('click', playClick);
+      });
+    });
+
+    soundToggleIcon.addEventListener('click', () => {
+      if (bgm.paused) {
+        bgm.play();
+        soundToggleIcon.src = 'image/speaker.png';
+        soundToggleIcon.alt = 'Sound On';
+      } else {
+        bgm.pause();
+        soundToggleIcon.src = 'image/mute.png';
+        soundToggleIcon.alt = 'Muted';
+      }
+    });
+
+    // 로고 클릭 시: 클릭 사운드 재생 후 페이지 이동
+const logoLink = document.querySelector('.logo');
+logoLink.addEventListener('click', function (e) {
+  e.preventDefault(); // 기본 링크 이동 막기
+  playClick(); // 클릭 사운드 재생
+  setTimeout(() => {
+    window.location.href = logoLink.href; // 약간의 지연 후 이동
+  }, 200); // 클릭 사운드 길이에 맞춰서 조절 (200~300ms 추천)
+});
+
+  </script>
+</body>
+</html>

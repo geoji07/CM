@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cooking Mama_mama</title>
+  <style>
+    @font-face { font-family: 'DDOSSaemmul'; src: url('DOSSaemmul.ttf') format('truetype'); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DDOSSaemmul', sans-serif;
+      background-color: #fffce9;
+      background-image:
+        radial-gradient(#ffd4e6 4px, transparent 4px),
+        radial-gradient(#ffd4e6 4px, transparent 4px);
+      background-position: 0 0, 20px 20px;
+      background-size: 40px 40px;
+    }
+    /* 로고: 화면 전체 왼쪽 상단, 반응형 */
+    .logo {
+      position: fixed;
+      top: clamp(10px, 2vw, 12px);
+      left: clamp(10px, 2vw, 12px);
+      width: clamp(20px, 5vw, 100px);
+      height: auto;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    .logo img { width: 100%; height: auto; display: block; }
+    .wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 1rem;
+      position: relative;
+    }
+    .container {
+      aspect-ratio: 1.4 / 1;
+      width: min(130vw, 110vh);
+      max-width: 1800px;
+      max-height: 1200px;
+      padding: 32px;
+      background-image: url('image/mama_background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 6px solid #ff8dbd;
+      border-radius: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+    /* 추가: 시작 화면 오버레이 */
+    .overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 206, 227, 0.788);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease, visibility 0.5s;
+    }
+    .overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .start-btn {
+      font-family: 'DDOSSaemmul', sans-serif;
+      font-size: clamp(1rem, 2vw, 2rem);
+      padding: clamp(0.8rem, 2vh, 1.2rem) clamp(3rem, 6vw, 12rem);
+      border: 3px solid #ff99c8;
+      background: #fff;
+      color: #ff289b;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform .2s, background .2s;
+    }
+    .start-btn:hover {
+      background: #ffe6f1;
+      transform: scale(1.05);
+    }
+
+    .dialogue-box {
+      width: 100%;
+      background-color: rgba(255, 250, 239, 0.9);
+      padding: clamp(0.5rem, 1.5vw, 2.4rem);
+      font-size: clamp(12px, 2vw, 40px);
+      color: #ff289b;
+      text-align: center;
+      border-top: 4px solid #ff8dbd;
+      box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.05);
+      z-index: 2;
+      height: clamp(100px, 18vh, 220px);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      overflow: hidden;
+    }
+    .next-indicator { display:inline-block; margin-left:10px; animation:blink 1s infinite; cursor:pointer; font-size:0.8em; }
+    @keyframes blink {0%,100%{opacity:1;}50%{opacity:0;}}
+    .mama-excited-wrapper {
+      position:absolute;
+      bottom:clamp(100px,18vh,220px);
+      left:50%;
+      width:clamp(100px,18vw,400px);
+      transform:translateX(-50%);
+      opacity:0;
+      transition:opacity .6s, transform .6s;
+      z-index:1;
+    }
+    .mama-excited-wrapper.show {
+      opacity:1;
+      transform:translateX(-50%) scale(1);
+    }
+    .mama-excited { width:100%; height:auto; display:block; opacity:0; animation:fadeInImage 1s forwards; }
+    @keyframes fadeInImage { from{opacity:0;}to{opacity:1;} }
+    .heart { position:absolute; width:clamp(30px,3.5vw,100px); animation:floatHeart 3s ease-in-out infinite; z-index:1; }
+    .heart1{top:0;left:10px;animation-delay:0s;}
+    .heart2{top:60px;right:-20px;animation-delay:1s;}
+    @keyframes floatHeart {0%{transform:translateY(0);opacity:1;}50%{transform:translateY(-10px);opacity:0.7;}100%{transform:translateY(0);opacity:1;}}
+    .sparkle{position:absolute;width:clamp(20px,3.5vw,70px);opacity:0;animation:fadeInSparkle .8s forwards,floatSparkle 3s ease-in-out infinite;z-index:3;}
+    .sparkle1{top:0;left:0;}
+    .sparkle2{top:0;right:0;}
+    .sparkle3{bottom:0;left:0;}
+    .sparkle4{bottom:0;right:0;}
+    @keyframes fadeInSparkle{from{opacity:0;}to{opacity:1;}}
+    @keyframes floatSparkle{0%{transform:translateY(0);}50%{transform:translateY(-10px);}100%{transform:translateY(0);}}
+    .choice-box{
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      display:flex; flex-direction:column;
+      align-items:center; gap:clamp(1rem,2vh,2rem);
+      z-index:4;
+    }
+    .choice-btn{
+      font-family:'DDOSSaemmul',sans-serif;
+      font-size:clamp(1rem,2vw,2rem);
+      padding:clamp(0.8rem,2vh,1.2rem) clamp(3rem,6vw,12rem);
+      border:3px solid #ff99c8;
+      background:rgba(255,255,255,0.63);
+      color:#ff289b;
+      border-radius:15px;
+      cursor:pointer;
+      backdrop-filter:blur(3px);
+      transition:.2s;
+      text-align:center;
+      width:min(90vw,600px);
+    }
+    .choice-btn:hover{background:#ffe6f1da;transform:scale(1.05);color:#d91a79;}
+    .choice-btn:active{background:rgba(255,255,255,0.9);transform:scale(0.98);}
+    .menu{
+      display:flex; flex-direction:column;
+      justify-content:center; align-items:center;
+      gap:2rem;
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      z-index:5;
+      text-align:center;
+      width:100%; max-width:300px;
+    }
+    .menu a, .menu button { text-decoration:none; }
+    .menu button{
+      display:flex; align-items:center; justify-content:center;
+      font-family:'DDOSSaemmul',sans-serif;
+      font-size:clamp(1rem,2vw,2rem);
+      padding:clamp(0.8rem,2vh,1.2rem) clamp(3rem,6vw,12rem);
+      border:3px solid #ff99c8;
+      background:white;
+      color:#ff289b;
+      border-radius:15px;
+      cursor:pointer;
+      transition:.15s;
+      width:clamp(100px,15vw,300px);
+      white-space:nowrap;
+      text-align:center;
+      margin:0 auto;
+    }
+    .menu button:active{transform:scale(0.95);background:#ffe6f1;border-color:#ff69b4;color:#ff3399;}
+    .sound-toggle{position:fixed;top:20px;right:20px;width:clamp(30px,5vw,35px);cursor:pointer;z-index:9999;transition:.2s;}
+    .sound-toggle:active{transform:scale(0.9);}
+    .sound-toggle img{width:100%;height:auto;display:block;}
+    footer{
+      position:fixed;bottom:0;width:100%;text-align:center;
+      padding:0.8rem 0;font-size:0.8rem;color:#888;
+      background:#ffe2f0;border-top:2px dotted #ffb6d9;
+      box-shadow:inset 0 2px 0 #fff;z-index:10;
+    }
+
+    .heart {
+  position: fixed;
+  font-size: 20px;
+  color: rgb(255, 172, 206);
+  pointer-events: none;
+  animation: followFade 1s ease-out forwards;
+  z-index: 9999;
+  opacity: 0.8;
+}
+
+@keyframes followFade {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(5px, -10px) scale(1.5); opacity: 0; }
+}
+
+.heart-click {
+  position: fixed;
+  font-size: 25px;
+  color: rgb(255, 117, 186);
+  pointer-events: none;
+  animation: riseFade 1s ease-out forwards;
+  z-index: 9999;
+  opacity: 0.9;
+}
+
+@keyframes riseFade {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-60px) scale(1.5); opacity: 0; }
+}
+
+/* 🖱️ 기본 커서 */
+body {
+  cursor: url('image/cursor.cur'), auto;
+}
+
+/* 🖱️ 클릭 중 커서 */
+body.clicked {
+  cursor: url('image/cursor_click.cur'), auto;
+}
+
+/* 🖱️ 버튼 위 hover 시 커서 변경 */
+.start-btn,
+.choice-btn,
+.menu button,
+.sound-toggle {
+  cursor: url('image/cusor_button.cur'), pointer;
+}
+
+.dropdown-nav {
+  position: absolute;
+  top: clamp(12px, 2vw, 20px);
+  right: clamp(12px, 2vw, 20px);
+  z-index: 999;
+}
+
+.nav-toggle {
+  font-family: 'DDOSSaemmul', sans-serif;
+  font-size: clamp(20px, 3vw, 30px);
+  background: #fff;
+  border: 2px solid #ff8dbd;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  color: #ff3399;
+  cursor: url('image/cusor_button.cur'), pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s ease;
+}
+
+.nav-toggle:hover {
+  background-color: #ffe2f0;
+}
+
+.nav-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: none;
+  flex-direction: column;
+  background: #fffce9;
+  border: 2px solid #ffb6d9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  z-index: 998;
+}
+
+.nav-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 180px;
+  padding: 0.6rem 1.2rem;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: #da2485;
+  text-decoration: none;
+  border-bottom: 1px solid #ffe2f0;
+}
+
+.nav-menu a:last-child {
+  border-bottom: none;
+}
+
+.nav-menu a:hover {
+  background: #ffb6d9;
+  color: white;
+  cursor: url('image/cusor_button.cur'), pointer;
+}
+
+.nav-menu.show {
+  display: flex;
+}
+
+.heart-bg {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.8;
+  font-size: 30px;
+  color: #ffbbcc;
+  animation: popFade 2.5s ease-out forwards;
+}
+
+@keyframes popFade {
+  0% {
+    transform: scale(0.6) translateY(0);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.2) translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-60px);
+    opacity: 0;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <!-- 로고 -->
+  <a href="CM.html" class="logo"><img src="image/logo.png" alt="로고"></a>
+
+  <div class="wrapper">
+    <div class="container">
+
+      <!-- 네비게이션 드롭다운 메뉴 -->
+<div class="dropdown-nav">
+  <button class="nav-toggle" aria-label="메뉴 열기">≡</button>
+  <div class="nav-menu">
+    <a href="CM.html">🏠 홈</a>
+    <a href="MAMA.html">🍳 쿠킹마마</a>
+    <a href="Recipe.html">📖 레시피</a>
+    <a href="Tip.html">💡 도구팁</a>
+  </div>
+</div>
+
+      <!-- 시작 화면 오버레이 -->
+      <div class="overlay" id="startOverlay">
+        <button id="startBtn" class="start-btn">♥</button>
+      </div>
+
+      <!-- 사운드 토글 -->
+      <div class="sound-toggle" id="soundToggle">
+        <img src="image/speaker.png" alt="Sound On" id="soundIcon" />
+      </div>
+
+      <!-- 선택지 -->
+      <div class="choice-box" id="choices">
+        <button class="choice-btn" id="choice1">...?</button>
+        <button class="choice-btn" id="choice2">뭐야</button>
+      </div>
+
+      <!-- 대화 상자 -->
+      <div class="dialogue-box" id="dialogueBox"></div>
+
+      <!-- 마마 이미지 + 효과 -->
+      <div class="mama-excited-wrapper" id="mamaImage">
+        <img src="image/mama_excited.png" alt="마마" class="mama-excited" id="mamaCharacter"/>
+        <img src="image/heart1.png" class="heart heart1" id="heart1"/>
+        <img src="image/heart1.png" class="heart heart2" id="heart2"/>
+        <div id="sparkles"></div>
+      </div>
+
+      <!-- 메뉴 버튼 -->
+      <div class="menu" id="menuButtons" style="display:none;">
+        <a href="Recipe.html"><button>레시피</button></a>
+        <a href="Tip.html"><button>도구팁</button></a>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2025 쿠킹마마 팬페이지 · 비공식 사이트입니다.</footer>
+
+  <!-- 오디오 -->
+  <audio id="bgm" src="music.m4a" loop autoplay></audio>
+  <audio id="clickSound" src="button-click.mp3" preload="auto"></audio>
+
+  <script>
+    // 요소 가져오기
+    const logo        = document.querySelector('.logo');
+    const toggle      = document.getElementById('soundToggle');
+    const icon        = document.getElementById('soundIcon');
+    const music       = document.getElementById('bgm');
+    const clickSound  = document.getElementById('clickSound');
+
+    const overlay     = document.getElementById('startOverlay');
+    const startBtn    = document.getElementById('startBtn');
+    const choice1     = document.getElementById('choice1');
+    const choice2     = document.getElementById('choice2');
+    const choices     = document.getElementById('choices');
+    const dialogueBox = document.getElementById('dialogueBox');
+    const mamaImage   = document.getElementById('mamaImage');
+    const container   = document.querySelector('.container');
+    const menuBtns    = document.querySelectorAll('.menu button');
+
+    let isPlaying = true;
+    let dialogueStep = 0;
+    let readyToAdvance = false;
+
+    // 클릭 효과음 재생 함수
+    function playClick() {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+    }
+
+    // 시작 버튼
+    startBtn.addEventListener('click', () => {
+      playClick();
+      overlay.classList.add('hidden');
+      setTimeout(() => overlay.style.display = 'none', 500);
+      music.play().catch(err => console.warn('BGM 재생 실패:', err));
+    });
+
+    // 로고 클릭
+    logo.addEventListener('click', () => {
+      playClick();
+      // a 태그 기본 이동 동작 유지
+    });
+
+    // 사운드 토글
+    toggle.addEventListener('click', () => {
+      playClick();
+      if (music.paused) {
+        music.play().catch(() => {});
+        icon.src = 'image/speaker.png';
+      } else {
+        music.pause();
+        icon.src = 'image/mute.png';
+      }
+    });
+
+    // 선택지 클릭
+    function handleChoice() {
+      choices.style.display = 'none';
+      mamaImage.classList.add('show');
+      setTimeout(() => {
+        dialogueStep = 1;
+        showDialogue('안녕?\n마마와 함께\n요리를 시작해볼까요~?', dialogueBox);
+      }, 300);
+    }
+    choice1.addEventListener('click', () => { playClick(); handleChoice(); });
+    choice2.addEventListener('click', () => { playClick(); handleChoice(); });
+
+    // 대화 표시 함수
+    function showDialogue(text, el) {
+      el.innerHTML = '';
+      let idx = 0;
+      readyToAdvance = false;
+      const iv = setInterval(() => {
+        el.innerHTML += text[idx] === '\n' ? '<br>' : text[idx];
+        idx++;
+        if (idx >= text.length) {
+          clearInterval(iv);
+          const ind = document.createElement('span');
+          ind.className = 'next-indicator';
+          ind.textContent = '▼';
+          el.appendChild(ind);
+          readyToAdvance = true;
+        }
+      }, 60);
+    }
+
+    // 반짝이 생성
+    function createSparkles() {
+      const sparkles = document.getElementById('sparkles');
+      sparkles.innerHTML = '';
+      ['sparkle1','sparkle2','sparkle3','sparkle4'].forEach(c => {
+        const s = document.createElement('img');
+        s.src = 'image/sparkle.png';
+        s.className = `sparkle ${c}`;
+        sparkles.appendChild(s);
+      });
+    }
+
+    // 대화 진행
+    function advanceDialogue() {
+      if (!readyToAdvance) return;
+      const tri = dialogueBox.querySelector('.next-indicator');
+      if (tri) tri.remove();
+      readyToAdvance = false;
+
+      if (dialogueStep === 1) {
+        document.getElementById('heart1').remove();
+        document.getElementById('heart2').remove();
+        document.getElementById('mamaCharacter').src = 'image/mama_wink.png';
+        createSparkles();
+        dialogueStep = 2;
+        showDialogue('마마와 함께라면\n어렵지 않아요!', dialogueBox);
+
+      } else if (dialogueStep === 2) {
+        dialogueBox.style.display = 'none';
+        mamaImage.style.display = 'none';
+        document.getElementById('menuButtons').style.display = 'flex';
+      }
+    }
+
+    // 화면 클릭으로 대화 advance
+    container.addEventListener('click', () => {
+      playClick();
+      advanceDialogue();
+    });
+
+    // 메뉴 버튼 클릭음
+    menuBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        playClick();
+        // 기본 a → page 이동 유지
+      });
+    });
+
+    // 하트가 너무 많이 생기지 않게 타이머 설정
+let lastMoveTime = 0;
+document.addEventListener('mousemove', function(e) {
+  const now = Date.now();
+  if (now - lastMoveTime < 100) return; // 최소 간격 100ms
+  lastMoveTime = now;
+
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.textContent = '♥';
+  heart.style.left = (e.pageX - 5) + 'px';
+  heart.style.top = (e.pageY - 5) + 'px';
+  document.body.appendChild(heart);
+
+  setTimeout(() => heart.remove(), 1000);
+});
+
+// 클릭 시 여러 개의 하트가 뾰로롱 올라감
+document.addEventListener('click', function(e) {
+  for (let i = 0; i < 5; i++) {
+    const heart = document.createElement('div');
+    heart.className = 'heart-click';
+    heart.textContent = '♥';
+
+    const offsetX = (Math.random() - 0.5) * 40; // -20 ~ +20 px
+    const offsetY = (Math.random() - 0.5) * 20;
+
+    heart.style.left = (e.pageX + offsetX) + 'px';
+    heart.style.top = (e.pageY + offsetY) + 'px';
+
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1000);
+  }
+});
+
+  // 마우스 클릭 시 body에 clicked 클래스 부여
+  document.addEventListener('mousedown', () => {
+    document.body.classList.add('clicked');
+  });
+
+  document.addEventListener('mouseup', () => {
+    document.body.classList.remove('clicked');
+  });
+
+// 드롭다운 메뉴 열고 닫기
+const navToggle = document.querySelector('.nav-toggle');
+const navMenu = document.querySelector('.nav-menu');
+
+navToggle.addEventListener('click', () => {
+  navMenu.classList.toggle('show');
+  playClick();
+});
+
+function isOverlappingContainer(x, y) {
+  const container = document.querySelector('.container');
+  const rect = container.getBoundingClientRect();
+  return (
+    x > rect.left &&
+    x < rect.right &&
+    y > rect.top &&
+    y < rect.bottom
+  );
+}
+
+function createFloatingHeart() {
+  const heart = document.createElement('div');
+  heart.className = 'heart-bg';
+  heart.textContent = '♥';
+
+  let x, y;
+  let tries = 0;
+  const maxTries = 15;
+
+  do {
+    x = Math.random() * window.innerWidth;
+    y = Math.random() * window.innerHeight;
+    tries++;
+  } while (isOverlappingContainer(x, y) && tries < maxTries);
+
+  heart.style.left = `${x}px`;
+  heart.style.top = `${y}px`;
+
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 2500);
+}
+
+// 주기적으로 여러 하트를 생성
+setInterval(() => {
+  const count = Math.floor(Math.random() * 3) + 4; // 4~6개 생성
+  for (let i = 0; i < count; i++) {
+    setTimeout(createFloatingHeart, i * 150);
+  }
+}, 2000);
+
+  </script>
+</body>
+</html>
+
